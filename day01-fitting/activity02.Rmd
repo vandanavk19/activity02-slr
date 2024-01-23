@@ -36,10 +36,10 @@ If you would like to try the *ISLR* labs using these two packages instead of bas
 - Once you have verified that both `{tidyverse}` and `{tidymodels}` are installed, load these packages in the R chunk below titled `setup`.
   That is, type the following:
   
-  ```{r library-example, eval = FALSE}
+```{r library-example, eval = FALSE}
   library(tidyverse)
   library(tidymodels)
-  ```
+```
   
 - Run the `setup` code chunk and/or **knit** <img src="../README-img/knit-icon.png" alt="knit" width = "20"/> icon your Rmd document to verify that no errors occur.
 

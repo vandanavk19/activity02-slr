@@ -66,7 +66,7 @@ In the R code chunk below titled `load-data`, you will type the code that reads 
 
 # url <- "https://www.openintro.org/data/csv/hfi.csv"
 #hfi <- readr::read_csv(url)
-read.csv("hfi.csv")
+hfi <- read.csv("hfi.csv")
 
 ```
 
@@ -411,7 +411,7 @@ Answer the following question:
 
 - In the code chunk below titled `residual-histogram`, replace "verbatim" with "r" just before the code chunk title. 
  
-```{r fitted-residual}
+```{r fitted-residual2}
 ggplot(data = train_aug, aes(x = .resid)) +
   geom_histogram(binwidth = 0.25) +
   xlab("Residuals")

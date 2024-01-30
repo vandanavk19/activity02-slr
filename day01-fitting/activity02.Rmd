@@ -36,7 +36,7 @@ If you would like to try the *ISLR* labs using these two packages instead of bas
 - Once you have verified that both `{tidyverse}` and `{tidymodels}` are installed, load these packages in the R chunk below titled `setup`.
   That is, type the following:
   
-```{r library-example, eval = FALSE}
+```{r library-example}
   library(tidyverse)
   library(tidymodels)
 ```
@@ -58,8 +58,17 @@ Here is the "about" page: https://www.openintro.org/data/index.php?data=hfi.
 
 In the R code chunk below titled `load-data`, you will type the code that reads in the above linked CSV file by doing the following:
 
+
 - Rather than downloading this file, uploading to RStudio, then reading it in, explore how to load this file directly from the provided URL with `readr::read_csv` (`{readr}` is part of `{tidyverse}`).
 - Assign this data set into a data frame named `hfi` (short for "Human Freedom Index").
+
+```{r load-data}
+
+# url <- "https://www.openintro.org/data/csv/hfi.csv"
+#hfi <- readr::read_csv(url)
+read.csv("hfi.csv")
+
+```
 
 After doing this and viewing the loaded data, answer the following questions:
 
@@ -74,6 +83,9 @@ In the R code chunk below titled `hfi-2016`, type the code that does the followi
 - Assigns the result to a data frame named `hfi_2016`.
 
 ```{r hfi-2016}
+
+hfi_2016 <- hfi %>%
+  filter(year == 2016)
 
 ```
 
@@ -92,32 +104,77 @@ Answer the following questions (use your markdown skills) and complete the follo
 2. What type of plot would you use to display the distribution of the personal freedom scores, `pf_score`? 
   Would this be the same type of plot to display the distribution of the political pressures and controls on media content index, `pf_expression_control`?
 
-
-
 - In the R code chunk below titled `univariable-plots`, type the R code that displays this plot for `pf_score`.
 - In the R code chunk below titled `univariable-plots`, type the R code that displays this plot for `pf_expression_control`.
 
 ```{r distribution-plots}
 
+# HISTOGRAM 'pf_score'
+
+hist_gram <- hfi_2016 %>% 
+  ggplot(aes(x = pf_score)) +
+  geom_histogram(binwidth = 1, 
+                 fill = "dodgerblue", 
+                 color = "black", 
+                 alpha = 0.7) +
+  labs(title = "Distribution of Personal Freedom Scores (2016)",
+       x = "Personal Freedom Score",
+       y = "Frequency")
+
+hist_gram
+
+
+# DENSITY PLOT 'pf_expression_control'
+
+density_plot <- hfi_2016 %>%
+  ggplot(aes(x = pf_expression_control)) +
+  geom_density(fill = 'yellow', alpha = 0.5) +
+  labs(title = 'Density Plot of Political Pressures and Controls on Media Content Index',
+       x = 'Political Pressures and Controls on Media Content Index (pf_expression_control)',
+       y = 'Density') +
+  theme_minimal()
+
+density_plot
 ```
 
 4. Comment on each of these two distributions. 
   Be sure to describe their centers, spread, shape, and any potential outliers.
+```{r}
+
+summary_pf_score <- summary(hfi_2016$pf_score)
+summary_pf_score
+
+summary_pf_expression_control <- summary(hfi_2016$pf_expression_control)
+summary_pf_expression_control
 
 
+```
 
 3. What type of plot would you use to display the relationship between the personal freedom score, `pf_score`, and the political pressures and controls on media content index,`pf_expression_control`?
-
-
 
 - In the R code chunk below titled `relationship-plot`, plot this relationship using the variable `pf_expression_control` as the predictor/explanatory variable.
 
 ```{r relationship-plot}
 
+# SCATTER PLOT between 'pf_score' and 'pf_expression_control'
+# geom_smooth(method = 'lm', se = FALSE, color = 'red') adds a linear regression line to the scatter plot. 
+# The method = 'lm' specifies that a linear model should be used, se = FALSE disables the display of the confidence interval around the line. 
+
+ggplot(hfi_2016, 
+       aes(x = pf_expression_control, 
+           y = pf_score)) +
+  geom_point(color = 'coral') +
+  geom_smooth(method = 'lm', se = FALSE, color = 'darkgray') +  # Add a linear regression line
+  
+  labs(title = 'Scatter Plot and Linear Regression Line',
+       x = 'Political Pressures and Controls on Media Content Index (pf_expression_control)',
+       y = 'Personal Freedom Score') +
+  theme_minimal()
 ```
 
 4. Does the relationship look linear?
   If you knew a country's `pf_expression_control`, or its score out of 10, with 0 being the most, of political pressures and controls on media content, would you be comfortable using a linear model to predict the personal freedom score?
+
 
 #### Challenge
 
@@ -130,6 +187,14 @@ What numerical summary would you use to describe the relationship between two nu
 (hint: explore the `cor` function from Base R)
 
 ```{r challenge}
+
+# The correlation coefficient quantifies the strength and direction of the linear relationship between two variables. 
+
+# Value close to 1 indicates a strong positive correlation, close to -1 indicates a strong negative correlation, and close to 0 indicates a weak correlation.
+
+correlation_coefficient <- cor(hfi_2016$pf_score, hfi_2016$pf_expression_control)
+
+correlation_coefficient
 
 ```
 
@@ -144,7 +209,7 @@ To begin, we will create a `{parsnip}` specification for a linear model.
 
 - In the code chunk below titled `parsnip-spec`, replace "verbatim" with "r" just before the code chunk title.
 
-```{verbatim parsnip-spec}
+```{r parsnip-spec}
 lm_spec <- linear_reg() %>%
   set_mode("regression") %>%
   set_engine("lm")
@@ -166,11 +231,19 @@ Look at your knitted document to see how this syntax appears.
 
 - In the code chunk below titled `fit-lm`, replace "verbatim" with "r" just before the code chunk title. 
 
-```{verbatim fit-lm}
+```{r fit-lm}
 slr_mod <- lm_spec %>% 
   fit(pf_score ~ pf_expression_control, data = hfi_2016)
 
 tidy(slr_mod)
+
+#coefficients <- tidy(slr_mod)
+
+#intercept <- coefficients$estimate[coefficients$term == "Intercept"]
+#slope <- coefficients$estimate[coefficients$term == "pf_expression_control"]
+
+#intercept
+#slope
 ```
 
 The above code fits our SLR model, then provides a `tidy` parameter estimates table.
@@ -178,7 +251,7 @@ The above code fits our SLR model, then provides a `tidy` parameter estimates ta
 5. Using the `tidy` output, update the below formula with the estimated parameters.
   That is, replace "intercept" and "slope" with the appropriate values
 
-$\hat{\texttt{pf\score}} = intercept + slope \times \texttt{pf\_expression\_control}$
+$\hat{\texttt{pf\score}} = 4.2838153 + 0.5418452 \times \texttt{pf\_expression\_control}$
 
 
 6. Interpret each of the estimated parameters from (5) in the context of this research question.
@@ -201,7 +274,7 @@ We use `glance` from  `{broom}` (which is automatically loaded with `{tidymodels
 
 - In the code chunk below titled `glance-lm`, replace "verbatim" with "r" just before the code chunk title. 
 
-```{verbatim glance-mod}
+```{r glance-mod}
 glance(slr_mod)
 ```
 
@@ -230,13 +303,27 @@ Using the `diamonds` example provided to you in the Day 2 `README`, do the follo
 - Create an initial 80-20 split of the `hfi_2016` dataset
 - Using your initial split R object, assign the two splits into a training R object and a testing R object.
 
+```{r train-test}
+
+set.seed(123)
+
+# An initial 80-20 split of the hfi_2016 dataset
+initial_split <- initial_split(hfi_2016, prop = 0.8, strata = NULL)
+
+# Assigning the two splits into a training R object and a testing R object
+train_data <- training(initial_split)
+test_data <- testing(initial_split)
+
+```
+
+
 Now, you will use your training dataset to fit a SLR model.
 
 - In the code chunk below titled `train-fit-lm`, replace "verbatim" with "r" just before the code chunk title and update the data set to your training R object you just created.
 
-```{verbatim train-fit-lm}
+```{r train-fit-lm}
 slr_train <- lm_spec %>% 
-  fit(pf_score ~ pf_expression_control, data = hfi_2016)
+  fit(pf_score ~ pf_expression_control, data = train_data)
 
 tidy(slr_train)
 ```
@@ -246,7 +333,7 @@ Notice that you can reuse the `lm_spec` specification because we are still doing
 9. Using the `tidy` output, update the below formula with the estimated parameters.
   That is, replace "intercept" and "slope" with the appropriate values
 
-$\hat{\texttt{pf\score}} = intercept + slope \times \texttt{pf\_expression\_control}$
+$\hat{\texttt{pf\score}} = 4.3209799 + 0.5356224 \times \texttt{pf\_expression\_control}$
 
 
 10. Interpret each of the estimated parameters from (10) in the context of this research question.
@@ -257,8 +344,8 @@ Now we will assess using the testing data set.
 
 - In the code chunk below titled `train-fit-lm`, replace "verbatim" with "r" just before the code chunk title and update `data_test` to whatever R object you assigned your testing data to above.
   
-```{verbatim glance-test}
-test_aug <- augment(slr_train, new_data = data_test)
+```{r glance-test}
+test_aug <- augment(slr_train, new_data = test_data)
 test_aug
 ```
 
@@ -288,9 +375,10 @@ We can use `broom::augment` to calculate these.
 
 - In the code chunk below titled `augment`, replace "verbatim" with "r" just before the code chunk title and update `data_test` to whatever R object you assigned your testing data to above. 
   
-```{verbatim augment}
-train_aug <- augment(slr_train)
 
+```{r augment}
+train_aug <- augment(slr_train, new_data = test_data)
+# Check the augmented data
 train_aug
 ```
 
@@ -300,8 +388,10 @@ We should also verify this condition with a plot of the residuals vs. fitted (pr
 
 - In the code chunk below titled `fitted-residual`, replace "verbatim" with "r" just before the code chunk title. 
   
-```{verbatim fitted-residual}
-ggplot(data = train_aug, aes(x = .fitted, y = .resid)) +
+```{r fitted-residual}
+
+library(ggplot2)
+ggplot(data = train_aug, aes(x = .pred, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   xlab("Fitted values") +
@@ -321,7 +411,7 @@ Answer the following question:
 
 - In the code chunk below titled `residual-histogram`, replace "verbatim" with "r" just before the code chunk title. 
  
-```{verbatim fitted-residual}
+```{r fitted-residual}
 ggplot(data = train_aug, aes(x = .resid)) +
   geom_histogram(binwidth = 0.25) +
   xlab("Residuals")
